@@ -45,7 +45,7 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 flex h-16 items-center justify-between">
         {/* === Left: Logo === */}
-        <LogoLink name={details.name} iconUrl={details.icon} />
+        <LogoLink name={AppData.APP_NAME} iconUrl={AppData.APP_ICON} />
 
         {/* === Right: Navigation === */}
         <div className="flex items-center gap-3 md:gap-5">
@@ -156,7 +156,7 @@ export function LogoLink({ name, iconUrl }: { name: string; iconUrl: string }) {
           className="object-contain"
         />
         <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">
-          {details.name.charAt(0).toUpperCase()}
+          {name.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
 
@@ -166,7 +166,7 @@ export function LogoLink({ name, iconUrl }: { name: string; iconUrl: string }) {
           "group-hover:text-primary transition-colors"
         )}
       >
-        EduNexus
+        {name}
       </span>
     </Link>
   );

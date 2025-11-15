@@ -19,6 +19,16 @@ export const AppData = {
     "Streamline institute operations with EduNexus — secure, scalable, and role-based management.",
 
   OG_IMAGE: process.env.NEXT_PUBLIC_META_OG_IMAGE || "/og-image.png",
+  // 👉 Dynamic Not Found Metadata
+  NOT_FOUND_TITLE:
+    process.env.NEXT_PUBLIC_NOT_FOUND_TITLE || "Page Under Construction",
+
+  NOT_FOUND_DESCRIPTION:
+    process.env.NEXT_PUBLIC_NOT_FOUND_DESCRIPTION ||
+    "This page is currently being built. Please check back soon.",
+
+  NOT_FOUND_OG_IMAGE:
+    process.env.NEXT_PUBLIC_NOT_FOUND_OG_IMAGE || "/under-construction-og.png",
 
   HeadersDetails: {
     links: [
@@ -27,8 +37,5 @@ export const AppData = {
       { title: "Contact", href: "/contact" },
     ],
     actions: [{ title: "Get Started", href: "/auth/institute-register" }],
-    name: "EduNexus",
-    icon: process.env.NEXT_PUBLIC_ICON_URL || "/favicon.ico",
-    description: "A web application for Institute Management.",
   },
 };
