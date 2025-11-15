@@ -34,3 +34,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+<!-- ============================================================================ -->
+
+npm install next-themes
+npx shadcn@latest add sonner
+npm install @reduxjs/toolkit
+npm install react-redux
+npx shadcn@latest add button
+npx shadcn@latest add navigation-menu
+npx shadcn@latest add popover
+npx shadcn@latest add avatar
+npx shadcn@latest add card
+npx shadcn@latest add separator
