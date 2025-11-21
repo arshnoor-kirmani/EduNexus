@@ -22,11 +22,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmailInput } from "@/components/Custom/Form/EmailCheckInput";
+import { PasswordInput } from "@/components/Custom/Form/PasswordInput";
+import Link from "next/link";
+import {
+  Building2Icon,
+  LucideLoader,
+  School,
+  University,
+  User2Icon,
+} from "lucide-react";
+import IconInput from "@/components/Custom/Form/IconInput";
+import { InstituteConf } from "@/helper/apiHelper/InsituteConfig";
+import { toast } from "sonner";
 
 export type InstituteFormValues = z.infer<typeof instituteSchema>;
 export default function page() {
   // ======================================
-  const [checkEmail, setCheckingEmail] = useState<boolean>(false);
+  const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
   const [isEmailAvailable, setIsEmailAvailable] = useState<boolean>(false);
   const [instituteName, setInstituteName] = useState<string>();
   // ======================================
@@ -35,7 +47,25 @@ export default function page() {
     defaultValues: { name: "", email: "", institute_name: "", password: "" },
   });
   // ================== On Submit================
-  async function onSubmit(values: InstituteFormValues) {}
+  async function onSubmit(values: InstituteFormValues) {
+    console.log({ values });
+    setIsSubmiting(true);
+    try {
+      const res = InstituteConf.register(values).then((res) => {
+        if (res.success) {
+          toast.success(res.message || res.error);
+        } else {
+          toast.warning(res.message || res.error);
+        }
+        setIsSubmiting(false);
+      });
+      console.log({ res });
+    } catch (err: any) {
+      console.log({ err });
+      setIsSubmiting(false);
+      toast.error(err);
+    }
+  }
   return (
     <div className="container flex items-center justify-center min-h-screen p-4">
       <div className="w-[420px]">
@@ -53,7 +83,7 @@ export default function page() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-3"
               >
-                {/* Name */}
+                {/* Owner Name */}
                 <FormField
                   control={form.control}
                   name="name"
@@ -61,18 +91,24 @@ export default function page() {
                     <FormItem>
                       <FormLabel>Owner Name</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter Owner Name" />
+                        <IconInput
+                          {...field}
+                          placeholder="Enter Owner Name"
+                          className="pl-12"
+                          icon={<User2Icon />}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 {/* Email */}
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem className="relative">
+                    <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <EmailInput<InstituteFormValues>
@@ -83,37 +119,89 @@ export default function page() {
                           clearErrors={form.clearErrors}
                           setInstituteName={setInstituteName}
                           setEmailAvailable={setIsEmailAvailable}
+                          className="pl-12 w-full"
                         />
                       </FormControl>
                       <FormMessage />
+
+                      {/* Warning */}
                       {instituteName && (
-                        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-lg ">
+                        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-lg mt-1">
                           Your email is already linked with{" "}
-                          <strong>Arshnoor</strong>, but the account is not
-                          verified. Please verify to continue.
+                          <strong>{instituteName}</strong>, but the account is
+                          not verified. Please verify to continue.
                         </p>
                       )}
                     </FormItem>
                   )}
                 />
+
+                {/* Institute Name */}
+                <FormField
+                  control={form.control}
+                  name="institute_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Institute Name</FormLabel>
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          placeholder="Enter Institute Name"
+                          error={form.formState.errors.institute_name}
+                          icon={<Building2Icon />}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Password */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <PasswordInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
+                          className="pl-12"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Submit Button */}
                 <Button
                   type="submit"
+                  variant="default"
                   className="w-full p-3"
-                  // disabled={checkingEmail || success}
+                  disabled={!isEmailAvailable || isSubmiting}
                 >
-                  {
-                    //checkingEmail ? (
-                    //   <span className="inline-flex items-center gap-2">
-                    //     {" "}
-                    //     <LucideLoader className="animate-spin" size={16} />{" "}
-                    //     Submitting...
-                    //   </span>
-                    // ) : success ? (
-                    //   "Done"
-                    // ) :
+                  {isSubmiting ? (
+                    <span className="inline-flex items-center gap-2">
+                      <LucideLoader className="animate-spin" size={16} />
+                      Submitting...
+                    </span>
+                  ) : (
                     "Submit"
-                  }
+                  )}
                 </Button>
+
+                <Link href="/auth/institute-login">
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    className="w-full cursor-pointer"
+                  >
+                    Institute Login
+                  </Button>
+                </Link>
               </form>
             </FormProvider>
           </CardContent>

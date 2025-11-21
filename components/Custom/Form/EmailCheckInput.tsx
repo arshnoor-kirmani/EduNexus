@@ -2,8 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { InstituteConf } from "@/helper/apiHelper/InsituteConfig";
-import { LucideLoader } from "lucide-react";
-import { set } from "mongoose";
+import { LucideLoader, Mail, School } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   UseFormWatch,
@@ -43,9 +42,8 @@ export function EmailInput<T extends FieldValues>({
   useEffect(() => {
     if (debouncedValue) {
       trigger(name).then((valid) => {
-        setLoading(true);
-        console.log({ valid });
         if (valid) {
+          setLoading(true);
           setEmailAvailable(false);
           setInstituteName("");
           InstituteConf.checkEmailUnique(debouncedValue)
@@ -65,6 +63,8 @@ export function EmailInput<T extends FieldValues>({
                   res.data.institute.information.institute_name ||
                     "Unkown Institute"
                 );
+                clearErrors(name);
+                setEmailAvailable(true);
               } else {
                 clearErrors(name);
                 setEmailAvailable(true);
@@ -73,6 +73,9 @@ export function EmailInput<T extends FieldValues>({
             })
             .finally(() => {
               setLoading(false);
+            })
+            .catch((err) => {
+              console.log({ err });
             });
         }
       });
@@ -81,6 +84,12 @@ export function EmailInput<T extends FieldValues>({
 
   return (
     <div className="relative">
+      <div className="absolute left-0 top-0 h-full flex items-center pl-2.5 pr-2.5 border-r text-muted-foreground">
+        <div className="size-4.5 flex items-center justify-center">
+          <Mail />
+        </div>
+      </div>
+
       <Input
         {...props}
         value={value}

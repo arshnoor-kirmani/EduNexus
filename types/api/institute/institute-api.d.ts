@@ -22,7 +22,7 @@ import type Institute from "@/types/models/institute.model";
 // // =============================
 export interface PostCreateInstituteRequest {
   name: string;
-  Email: string;
+  email: string;
   password: string;
   institute_name: string;
 }

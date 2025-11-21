@@ -98,5 +98,27 @@ class Institute {
       };
     }
   }
+  public async register(
+    values: any
+  ): Promise<
+    ApiResponse<{ institute_id: string | null; institute_name: string | null }>
+  > {
+    try {
+      const res = await apiClient.post<
+        ApiResponse<{ institute_id: string; institute_name: string }>
+      >("institute", { ...values });
+      if (!res.success) throw new Error(res.error);
+      return res;
+    } catch (err: any) {
+      return {
+        success: false,
+        error: "Error registering institute",
+        data: {
+          institute_id: null,
+          institute_name: null,
+        },
+      };
+    }
+  }
 }
 export const InstituteConf = new Institute();
