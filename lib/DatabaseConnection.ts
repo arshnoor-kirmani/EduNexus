@@ -5,7 +5,7 @@ export type ConnectionObject = {
   dbName?: string;
 };
 
-// Reuse the same connection in dev/hot reload
+// Global cache for dev/hot-reload
 const globalWithMongoose = globalThis as typeof globalThis & {
   mongooseConnection?: ConnectionObject;
 };
@@ -13,48 +13,60 @@ const globalWithMongoose = globalThis as typeof globalThis & {
 export default async function dbConnect(
   databaseName: string
 ): Promise<ConnectionObject> {
-  // Check for existing cached connection
-  if (
-    globalWithMongoose.mongooseConnection?.isConnected === 1 &&
-    globalWithMongoose.mongooseConnection?.dbName === databaseName
-  ) {
-    console.log(`✅ Using existing database connection: ${databaseName}`);
-    return globalWithMongoose.mongooseConnection;
+  // ----------------------------------------
+  // 1) Return cached connection (if same DB)
+  // ----------------------------------------
+  const cached = globalWithMongoose.mongooseConnection;
+
+  if (cached?.isConnected === 1 && cached.dbName === databaseName) {
+    console.log(`✅ Reusing cached connection to: ${databaseName}`);
+    return cached;
   }
 
-  // Close previous connection if database name changed
-  if (
-    mongoose.connection.readyState === 1 &&
-    mongoose.connections[0]?.name !== databaseName
-  ) {
-    console.log(
-      `⚠️ Closing previous connection to ${mongoose.connections[0]?.name}...`
-    );
+  // ----------------------------------------
+  // 2) If connected to a different DB → close it
+  // ----------------------------------------
+  const currentState = mongoose.connection.readyState;
+  const currentDb = mongoose.connections[0]?.name;
+
+  if (currentState === 1 && currentDb && currentDb !== databaseName) {
+    console.log(`⚠️ Closing connection to old DB: ${currentDb}`);
     await mongoose.connection.close();
   }
 
-  try {
-    // Build connection string
-    const url =
-      databaseName === "institutes"
-        ? `${process.env.MONGODB_URL}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority`
-        : `${process.env.MONGODB_URL}/${databaseName}?retryWrites=true&w=majority`;
+  // ----------------------------------------
+  // 3) Build Connection String
+  // ----------------------------------------
+  const baseUrl = process.env.MONGODB_URL;
+  if (!baseUrl) throw new Error("❌ MONGODB_URL is missing in env!");
 
-    // Establish new connection
-    const db = await mongoose.connect(url, { maxPoolSize: 10 });
-    console.log(`Connected to MongoDB: ${db.connection.name}`);
+  const resolvedDB =
+    databaseName === "institutes" ? process.env.DATABASE_NAME : databaseName;
+
+  if (!resolvedDB) throw new Error("❌ Database name is missing!");
+  const connectionUri = `${baseUrl}/${resolvedDB}?retryWrites=true&w=majority`;
+
+  // ----------------------------------------
+  // 4) Connect to MongoDB
+  // ----------------------------------------
+  try {
+    const db = await mongoose.connect(connectionUri, {
+      maxPoolSize: 10,
+    });
+
+    console.log(`🔗 Connected to MongoDB: ${db.connection.name}`);
 
     const connection: ConnectionObject = {
-      isConnected: db.connections[0].readyState,
-      dbName: db.connections[0].name,
+      isConnected: db.connection.readyState,
+      dbName: db.connection.name,
     };
 
-    // Cache connection globally (prevents hot reload duplication)
+    // Cache for reuse
     globalWithMongoose.mongooseConnection = connection;
 
     return connection;
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
     throw new Error("Database connection failed");
   }
 }

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name: username, Email: email, password, institute_name } = body;
+    const { name: username, email, password, institute_name } = body;
 
     await dbConnect("institutes");
 
@@ -69,7 +69,9 @@ export async function POST(request: NextRequest) {
 
       existingInstitute.isVerified = false;
 
-      await existingInstitute.save();
+      await existingInstitute.save().then(() => {
+        console.log("Institute Information are updated.....");
+      });
 
       const emailRes = await EmailSender.sendEmail({
         code,
@@ -91,8 +93,10 @@ export async function POST(request: NextRequest) {
         {
           success: true,
           message: "Verification code re-sent. Please verify your account.",
-          userId: String(existingInstitute._id),
-          institute_code: existingInstitute.information.institute_code,
+          data: {
+            institute_id: String(existingInstitute._id),
+            institute_name: existingInstitute.information.institute_name,
+          },
         },
         { status: 200 }
       );
@@ -126,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     if (!emailRes.success) {
       return NextResponse.json(
-        { success: false, message: emailRes.message },
+        { success: false, error: emailRes.message },
         { status: 500 }
       );
     }
@@ -135,8 +139,10 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         message: "Institute created successfully. Verification code sent.",
-        userId: String(newInstitute._id),
-        institute_code: newInstitute.information.institute_code,
+        data: {
+          institute_id: String(newInstitute._id),
+          institute_name: newInstitute.information.institute_name,
+        },
       },
       { status: 201 }
     );

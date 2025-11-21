@@ -7,7 +7,16 @@ class EmailSenderConfig {
 
   constructor() {
     this.expiryInSeconds = Number(process.env.CODE_EXPIRY_TIME ?? 600);
-    this.apiUrl = process.env.EMAIL_SENDER_ENDPOINT || ("send-email" as string);
+    const raw = process.env.EMAIL_SENDER_ENDPOINT || "/api/send-email";
+
+    // If running on server → convert to absolute URL
+    if (typeof window === "undefined") {
+      const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      this.apiUrl = new URL(raw, base).href;
+    } else {
+      // Client side → relative works fine
+      this.apiUrl = raw;
+    }
   }
 
   /**

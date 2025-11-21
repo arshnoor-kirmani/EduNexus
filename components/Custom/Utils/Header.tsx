@@ -146,10 +146,10 @@ export function LogoLink({ name, iconUrl }: { name: string; iconUrl: string }) {
     <Link
       href="/"
       className={cn(
-        "flex items-center gap-2 group transition-all duration-200"
+        "flex items-center justify-center gap-1 group transition-all duration-200  rounded-md"
       )}
     >
-      <Avatar className="w-10 h-10 rounded-lg bg-foreground/10 dark:bg-muted p-1.5">
+      <Avatar className="">
         <AvatarImage
           src={iconUrl || "/icon.png"} // replace with your EduNexus logo icon
           alt={`${name} Icon`}
