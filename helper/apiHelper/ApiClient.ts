@@ -52,18 +52,17 @@ class ApiClient {
     // --- FIXED URL NORMALIZATION ---
     let url = endPoint;
 
-    if (!endPoint.startsWith("http")) {
-      const base = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") || "";
+    if (endPoint.startsWith("http")) {
+      url = endPoint + queryString;
+    } else {
       let clean = endPoint.replace(/^\/+/, "");
+
       if (!clean.startsWith("api/")) {
         clean = "api/" + clean;
       }
 
-      url = `${base}/${clean}`;
+      url = "/" + clean + queryString;
     }
-
-    // final URL with query
-    url += queryString;
 
     const config: AxiosRequestConfig = {
       url,
