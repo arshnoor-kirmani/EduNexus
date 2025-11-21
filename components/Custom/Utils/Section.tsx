@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { AppData } from "@/config/appConfig";
+import { AppData } from "@/helper/appConfig";
 import {
   BarChart3,
   School,
@@ -122,7 +122,7 @@ export default function Section() {
       </Card>
 
       {/* === FEATURE SECTION === */}
-      <Card className="border border-border/40 bg-card/80 backdrop-blur-sm shadow-md p-6 py-4  md:p-10 md:py-6 rounded-2xl">
+      <Card className="border border-border/40 bg-card/80 backdrop-blur-sm shadow-md p-3  md:p-5  rounded-2xl">
         <CardHeader className="p-0 pb-4">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
             Powerful Tools for Every Role
@@ -168,8 +168,7 @@ export default function Section() {
             Access portal according to your role.
           </p>
         </CardHeader>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <InfoCard
             icon={<UniversityIcon className="w-6 h-6" />}
             title="Institute Login"
@@ -201,7 +200,7 @@ export default function Section() {
             color="chart-4"
             href="/auth/student-login"
           />
-        </div>
+        </CardContent>
       </Card>
     </section>
   );

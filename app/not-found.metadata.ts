@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AppData } from "@/config/appConfig";
+import { AppData } from "@/helper/appConfig";
 
 export const metadata: Metadata = {
   title: AppData.NOT_FOUND_TITLE,

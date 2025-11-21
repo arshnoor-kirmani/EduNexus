@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { AppData } from "@/config/appConfig";
+import { AppData } from "@/helper/appConfig";
 
 export default function Footer() {
   return (

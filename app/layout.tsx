@@ -3,9 +3,9 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/Custom/Utils/theme-provider";
 import { Toaster } from "sonner";
 import { Inter } from "next/font/google";
-import StoreProvider from "@/components/Custom/Utils/StoreProvider";
+// import StoreProvider from "@/components/Custom/Utils/StoreProvider";
 import RouteLoader from "@/components/Custom/Utils/RouteLoading";
-import { AppData as appMetadata } from "@/config/appConfig";
+import { MetadataBuilder } from "@/lib/MetadataBuilder";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,29 +13,22 @@ const inter = Inter({
 });
 
 // 🧭 --- Site Metadata ---
-export const metadata: Metadata = {
-  title: appMetadata.TITLE,
-  description: appMetadata.DESCRIPTION,
-  icons: {
-    icon: appMetadata.APP_ICON,
-  },
-  openGraph: {
-    title: appMetadata.OG_TITLE,
-    description: appMetadata.OG_DESCRIPTION,
-    url: appMetadata.APP_URL,
-    siteName: appMetadata.APP_NAME,
-    images: [
-      {
-        url: `${appMetadata.APP_URL}${appMetadata.OG_IMAGE}`,
-        width: 1200,
-        height: 630,
-        alt: appMetadata.OG_TITLE,
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-};
+export const metadata = MetadataBuilder.page({
+  title: "Welcome",
+  description:
+    "EduNecus – A complete Institute Management System that simplifies student management, admissions, staff operations, attendance, courses, finances, analytics, and more.",
+  keywords: [
+    "Institute Management System",
+    "EduNecus",
+    "Student Management",
+    "School Software",
+    "College Management",
+    "Fees Management",
+    "Admin Dashboard",
+    "Admission System",
+    "Education ERP",
+  ],
+});
 
 // 🧩 --- Root Layout ---
 export default function RootLayout({
@@ -58,7 +51,9 @@ export default function RootLayout({
           <RouteLoader />
 
           {/* Page content */}
-          <StoreProvider> {children}</StoreProvider>
+          {/* <StoreProvider> */}
+          {children}
+          {/* </StoreProvider> */}
 
           {/* Toast notifications */}
           <Toaster richColors />
