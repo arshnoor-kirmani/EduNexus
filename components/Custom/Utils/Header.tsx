@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AppData } from "@/config/appConfig";
+import { AppData } from "@/helper/appConfig";
 
 // Navigation links
 const details = AppData.HeadersDetails;

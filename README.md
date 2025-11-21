@@ -47,3 +47,11 @@ npx shadcn@latest add popover
 npx shadcn@latest add avatar
 npx shadcn@latest add card
 npx shadcn@latest add separator
+npx shadcn@latest add form
+npm install zod
+npm install usehooks-ts
+npm install react-hook-form
+npm install mongoose
+npm install nodemailer
+npm install axios
+npm install bcryptjs

@@ -1,3 +1,4 @@
+// import { ApiResponse } from "@/types/api/helper/api-response";
 import axios, { AxiosRequestConfig } from "axios";
 
 // Query params type
@@ -25,6 +26,17 @@ class ApiClient {
 
     return query ? `?${query}` : "";
   }
+  public normalizeEndpoint(endPoint: string): string {
+    if (endPoint.startsWith("http")) return endPoint; // full URL
+
+    let clean = endPoint.replace(/^\/+/, ""); // remove leading slashes
+
+    if (!clean.startsWith("api/")) {
+      clean = "api/" + clean;
+    }
+
+    return `${process.env.NEXT_PUBLIC_APP_URL}/${clean}`;
+  }
 
   // Core request method
   private async fetch<T>(endPoint: string, options?: FetchOptions): Promise<T> {
@@ -37,19 +49,33 @@ class ApiClient {
 
     const queryString = this.buildQuery(params);
 
+    // --- FIXED URL NORMALIZATION ---
+    let url = endPoint;
+
+    if (!endPoint.startsWith("http")) {
+      const base = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") || "";
+      let clean = endPoint.replace(/^\/+/, "");
+      if (!clean.startsWith("api/")) {
+        clean = "api/" + clean;
+      }
+
+      url = `${base}/${clean}`;
+    }
+
+    // final URL with query
+    url += queryString;
+
     const config: AxiosRequestConfig = {
-      url:
-        (endPoint.startsWith("http")
-          ? endPoint
-          : `/api/${
-              endPoint.startsWith("/") ? endPoint.substring(1) : endPoint
-            }`) + queryString,
+      url,
       method,
       headers: finalHeaders,
       data: body,
     };
 
+    console.log("FINAL URL →", config.url);
+
     const response = await axios<T>(config);
+    console.log({ response: response.data }); //remove
     return response.data;
   }
 

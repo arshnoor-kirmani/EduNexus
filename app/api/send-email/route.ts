@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 export async function POST(req: Request) {
   try {
     const { to, subject, html } = await req.json();
-
+    console.log({ to, subject, html }); //remove
     if (!to || !subject || !html) {
       return NextResponse.json(
         { success: false, message: "Missing parameters" },
@@ -22,14 +22,14 @@ export async function POST(req: Request) {
         pass: process.env.SMTP_EMAIL_PASS,
       },
     });
-
+    console.log({ transporter });
     const info = await transporter.sendMail({
       from: `${process.env.NEXT_PUBLIC_APP_NAME} <${process.env.SMTP_EMAIL_FROM}>`,
       to,
       subject,
       html,
     });
-
+    console.log({ info });
     return NextResponse.json(
       {
         success: true,

@@ -7,7 +7,7 @@ class EmailSenderConfig {
 
   constructor() {
     this.expiryInSeconds = Number(process.env.CODE_EXPIRY_TIME ?? 600);
-    this.apiUrl = process.env.EMAIL_SENDER_URL || ("send-email" as string);
+    this.apiUrl = process.env.EMAIL_SENDER_ENDPOINT || ("send-email" as string);
   }
 
   /**
@@ -155,6 +155,16 @@ class EmailSenderConfig {
     subject?: string;
   }): Promise<EmailSenderConfigResponse<any>> {
     try {
+      console.log({
+        code,
+        expiry,
+        to,
+        purpose,
+        username,
+        instituteName,
+        customMessage,
+        subject,
+      }); //remove
       const html = await this.generateTemplate({
         code,
         purpose,
@@ -170,13 +180,13 @@ class EmailSenderConfig {
           : purpose === "reset"
           ? "Reset Your Password - EduNexus"
           : "New Message From EduNexus");
-
+      console.log({ url: this.apiUrl }); //remove
       const response = await apiClient.post(this.apiUrl, {
         to,
         subject: finalSubject,
         html,
       });
-
+      console.log({ response });
       return {
         success: true,
         message: "Email sent successfully",

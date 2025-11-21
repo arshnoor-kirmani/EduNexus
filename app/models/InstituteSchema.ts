@@ -5,31 +5,31 @@ import { Schema, model, models, Model } from "mongoose";
 const InstituteSchema = new Schema<Institute>(
   {
     information: {
-      address: { type: String, default: "" },
-      city: { type: String, default: "" },
-      state: { type: String, default: "" },
-      pincode: { type: String, default: "" },
-      country: { type: String, default: "" },
-      mobile: { type: String, default: "" },
-      email: { type: String, default: "" },
-      website: { type: String, default: "" },
-      short_name: { type: String, default: "" },
-      institute_name: { type: String, default: "" },
-      institute_code: { type: String, default: "" },
+      address: { type: String, default: null },
+      city: { type: String, default: null },
+      state: { type: String, default: null },
+      pincode: { type: String, default: null },
+      country: { type: String, default: null },
+      mobile: { type: String, default: null },
+      email: { type: String, default: null },
+      website: { type: String, default: null },
+      short_name: { type: String, default: null },
+      institute_name: { type: String, default: null },
+      institute_code: { type: String, default: null },
       currency: { type: String, default: "INR" },
       timezone: { type: String, default: "Asia/Kolkata" },
       working_hours: { type: String, default: "9AM - 5PM" },
-      institute_type: { type: String, default: "" },
-      affiliation: { type: String, default: "" },
+      institute_type: { type: String, default: null },
+      affiliation: { type: String, default: null },
       established_year: { type: Number, default: new Date().getFullYear() },
-      logo: { type: String, default: "" },
-      profile_url: { type: String, default: "" },
+      logo: { type: String, default: null },
+      profile_url: { type: String, default: null },
     },
 
     username: { type: String, required: true, trim: true },
-    email: { type: String, required: true, lowercase: true, unique: true },
+    email: { type: String, required: true, lowercase: true },
     password: { type: String, required: true },
-    user_type: { type: String, default: "institute" },
+    user_type: { type: String, default: "institute", required: true },
     isVerified: { type: Boolean, default: false },
     verifyCode: { type: String, default: null },
     verifyCodeExpiry: { type: Date, default: null },
@@ -72,7 +72,10 @@ InstituteSchema.index(
   { unique: true, sparse: true }
 );
 
-InstituteSchema.index({ institute_name: "text", institute_short_name: "text" });
+InstituteSchema.index({
+  "information.institute_name": "text",
+  "information.short_name": "text",
+});
 
 InstituteSchema.index({
   "information.city": 1,
@@ -80,11 +83,12 @@ InstituteSchema.index({
   "information.country": 1,
 });
 
+InstituteSchema.index({ isVerified: -1 });
 InstituteSchema.index({ createdAt: -1 });
 InstituteSchema.index({ updatedAt: -1 });
 
 const InstituteModel =
-  (models.Institute as Model<Institute>) ||
+  (models?.Institute as Model<Institute>) ??
   model<Institute>("Institute", InstituteSchema);
 
 export default InstituteModel;

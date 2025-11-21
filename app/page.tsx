@@ -7,7 +7,7 @@ export default function Home() {
       {/* <div> */}
       <Header />
       {/* </div> */}
-      <main>
+      <main className="flex-1 mt-15">
         <Section />
       </main>
       <Footer />

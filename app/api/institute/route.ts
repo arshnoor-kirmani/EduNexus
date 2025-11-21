@@ -1,16 +1,12 @@
 import dbConnect from "@/lib/DatabaseConnection";
-import {
-  generateEmailTemplate,
-  generateOtp,
-  hashOtp,
-  otpExpiry,
-} from "@/config/ApiConfig";
+import { hashOtp } from "@/config/ApiConfig";
 import InstituteModel from "@/app/models/InstituteSchema";
 import { PostCreateInstituteRequest } from "@/types/api/institute/institute-api";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { EmailSender } from "@/config/EmailSendConfig";
+import { InstituteConf } from "@/helper/apiHelper/InsituteConfig";
 
 const UpdateInstituteSchema = z.object({
   institute_code: z.string().min(1, "Institute code is required"),
@@ -33,11 +29,23 @@ export async function POST(request: NextRequest) {
     await dbConnect("institutes");
 
     const existingInstitute = await InstituteModel.findOne({ email });
+
     const code = EmailSender.generateOtp();
     const verifyCode = await hashOtp(code);
     const verifyCodeExpiry = EmailSender.generateExpiry();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const codeResult = await InstituteConf.generateInstituteCode(
+      institute_name
+    );
+    console.log({ codeResult }); //remove
+    if (!codeResult.success) {
+      console.warn("FALLBACK CODE:", codeResult.message);
+    }
+    const finalInstituteCode: string = codeResult.institute_code;
 
-    // ================= Existing User Case =================
+    // ==========================================
+    // 1️⃣ If email already verified → BLOCK
+    // ==========================================
     if (existingInstitute && existingInstitute.isVerified) {
       return NextResponse.json(
         { success: false, message: "Email already registered" },
@@ -45,83 +53,90 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ==========================================
+    // 2️⃣ If email exists but NOT verified → RESEND OTP
+    // ==========================================
     if (existingInstitute && !existingInstitute.isVerified) {
+      existingInstitute.username = username;
+      existingInstitute.password = hashedPassword;
       existingInstitute.verifyCode = verifyCode;
       existingInstitute.verifyCodeExpiry = verifyCodeExpiry;
-      try {
-        await existingInstitute.save();
-        EmailSender.sendEmail({
-          code,
-          expiry: verifyCodeExpiry,
-          to: email,
-          purpose: "verify",
-          username,
-          instituteName: institute_name,
-        });
+
+      Object.assign(existingInstitute.information, {
+        institute_code: finalInstituteCode,
+        institute_name: institute_name,
+      });
+
+      existingInstitute.isVerified = false;
+
+      await existingInstitute.save();
+
+      const emailRes = await EmailSender.sendEmail({
+        code,
+        expiry: verifyCodeExpiry,
+        to: email,
+        purpose: "verify",
+        username,
+        instituteName: institute_name,
+      });
+
+      if (!emailRes.success) {
         return NextResponse.json(
-          {
-            success: true,
-            message: "Verification code resent successfully.",
-            userId: String(existingInstitute._id),
-          },
-          { status: 200 }
-        );
-      } catch (error) {
-        console.error("Error saving institute:", error);
-        return NextResponse.json(
-          { success: false, message: "Something went wrong to create account" },
+          { success: false, message: emailRes.message },
           { status: 500 }
         );
       }
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Verification code re-sent. Please verify your account.",
+          userId: String(existingInstitute._id),
+          institute_code: existingInstitute.information.institute_code,
+        },
+        { status: 200 }
+      );
     }
 
-    // ================= New Institute Case =================
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const initials = institute_name
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((word) => word[0].toUpperCase())
-      .join("");
-
-    const totalInstitutes = await InstituteModel.countDocuments();
-    const institute_code = `${initials}${String(totalInstitutes + 1).padStart(
-      4,
-      "0"
-    )}`;
-
+    // ==========================================
+    // 3️⃣ CREATE NEW INSTITUTE
+    // ==========================================
     const newInstitute = await InstituteModel.create({
       username,
       email,
       password: hashedPassword,
       institute_name,
-      institute_code,
+      information: {
+        institute_code: finalInstituteCode,
+      },
       verifyCode,
       verifyCodeExpiry,
       isVerified: false,
     });
 
-    const html = generateEmailTemplate(
+    // send OTP
+    const emailRes = await EmailSender.sendEmail({
       code,
-      "verify",
+      expiry: verifyCodeExpiry,
+      to: email,
+      purpose: "verify",
       username,
-      institute_name
-    );
-
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: email,
-        subject: "Verify Your Institute Email - EduNexus",
-        html,
-      }),
+      instituteName: institute_name,
     });
+
+    if (!emailRes.success) {
+      return NextResponse.json(
+        { success: false, message: emailRes.message },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {
         success: true,
         message: "Institute created successfully. Verification code sent.",
         userId: String(newInstitute._id),
+        institute_code: newInstitute.information.institute_code,
       },
       { status: 201 }
     );

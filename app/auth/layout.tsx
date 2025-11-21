@@ -1,0 +1,51 @@
+import React from "react";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ThemeToggle } from "@/components/Custom/Utils/theme-toggle";
+import { LogoLink } from "@/components/Custom/Utils/Header";
+import { AppData } from "@/helper/appConfig";
+import { MetadataBuilder } from "@/lib/MetadataBuilder";
+
+export const metadata = MetadataBuilder.auth("Institute Login");
+
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <LayoutWrapper>{children}</LayoutWrapper>;
+}
+
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative min-h-screen w-full bg-background">
+      {/* Background pattern */}
+      <div className="absolute inset-0 bg-grid-small text-primary/5 pointer-events-none" />
+
+      {/* Header Icons */}
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle className="border bg-background/80 backdrop-blur-md hover:bg-accent transition" />
+      </div>
+
+      <div className="absolute top-4 left-4 z-50">
+        <LogoLink name={AppData.APP_NAME} iconUrl={AppData.APP_ICON} />
+      </div>
+
+      {/* Main content */}
+      <main className="relative z-20 flex items-center justify-center min-h-screen px-4">
+        {children}
+      </main>
+
+      {/* Footer */}
+      <footer className="absolute bottom-4 left-0 right-0 z-20 text-center text-sm text-muted-foreground">
+        © {new Date().getFullYear()}{" "}
+        <b>
+          <Link href="/" className="hover:underline">
+            {AppData.APP_NAME}
+          </Link>
+        </b>{" "}
+        — All rights reserved.
+      </footer>
+    </div>
+  );
+}
