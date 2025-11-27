@@ -1,12 +1,12 @@
 import dbConnect from "@/lib/DatabaseConnection";
 import { hashOtp } from "@/config/ApiConfig";
-import InstituteModel from "@/app/models/InstituteSchema";
+import InstituteModel from "@/models/InstituteSchema";
 import { PostCreateInstituteRequest } from "@/types/api/institute/institute-api";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { EmailSender } from "@/config/EmailSendConfig";
-import { InstituteConf } from "@/helper/apiHelper/InsituteConfig";
+import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
 
 const UpdateInstituteSchema = z.object({
   institute_code: z.string().min(1, "Institute code is required"),
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const { name: username, email, password, institute_name } = body;
 
-    await dbConnect("institutes");
+    await dbConnect();
 
     const existingInstitute = await InstituteModel.findOne({ email });
 
@@ -111,6 +111,7 @@ export async function POST(request: NextRequest) {
       password: hashedPassword,
       institute_name,
       information: {
+        email,
         institute_code: finalInstituteCode,
       },
       verifyCode,
