@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { InstituteConf } from "@/helper/apiHelper/InsituteConfig";
+import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
 import { LucideLoader, Mail, School } from "lucide-react";
 import { useEffect, useState } from "react";
 import {

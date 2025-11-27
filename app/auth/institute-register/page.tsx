@@ -32,8 +32,14 @@ import {
   User2Icon,
 } from "lucide-react";
 import IconInput from "@/components/Custom/Form/IconInput";
-import { InstituteConf } from "@/helper/apiHelper/InsituteConfig";
+import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
 import { toast } from "sonner";
+import {
+  errorToast,
+  successToast,
+  warningToast,
+} from "@/components/Custom/Utils/Toast";
+import OTPDialog from "@/components/Custom/Form/OtpInput";
 
 export type InstituteFormValues = z.infer<typeof instituteSchema>;
 export default function page() {
@@ -41,6 +47,10 @@ export default function page() {
   const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
   const [isEmailAvailable, setIsEmailAvailable] = useState<boolean>(false);
   const [instituteName, setInstituteName] = useState<string>();
+  const [email, setEmail] = useState<string>(
+    "try.arshnoorkirmani+22@gmail.com"
+  );
+  const [otpOpen, setOtpOpen] = useState<boolean>(false);
   // ======================================
   const form = useForm<InstituteFormValues>({
     resolver: zodResolver(instituteSchema),
@@ -53,15 +63,18 @@ export default function page() {
     try {
       const res = InstituteConf.register(values).then((res) => {
         if (res.success) {
-          toast.success(res.message || res.error);
+          successToast("Institute Registered Successfully");
+          setEmail(values.email);
+          setOtpOpen(true);
         } else {
-          toast.warning(res.message || res.error);
+          warningToast(res.error || "Error registering institute");
         }
         setIsSubmiting(false);
       });
       console.log({ res });
     } catch (err: any) {
       console.log({ err });
+      errorToast(err.message || "Error registering institute");
       setIsSubmiting(false);
       toast.error(err);
     }
@@ -98,7 +111,7 @@ export default function page() {
                           icon={<User2Icon />}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="pl-2" />
                     </FormItem>
                   )}
                 />
@@ -122,7 +135,7 @@ export default function page() {
                           className="pl-12 w-full"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="pl-2" />
 
                       {/* Warning */}
                       {instituteName && (
@@ -151,7 +164,7 @@ export default function page() {
                           icon={<Building2Icon />}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="pl-2" />
                     </FormItem>
                   )}
                 />
@@ -171,7 +184,7 @@ export default function page() {
                           className="pl-12"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="pl-2" />
                     </FormItem>
                   )}
                 />
@@ -207,6 +220,14 @@ export default function page() {
           </CardContent>
         </Card>
       </div>
+      {/* ========================= */}
+      <OTPDialog
+        open={otpOpen}
+        onClose={() => setOtpOpen(false)}
+        email={email}
+        verificationType="forgot"
+        verifierType="institute"
+      />
     </div>
   );
 }

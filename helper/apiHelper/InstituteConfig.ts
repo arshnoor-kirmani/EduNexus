@@ -1,18 +1,23 @@
-import InstituteModel from "@/app/models/InstituteSchema";
-// import { apiClient } from "@/helper/apiHelper/ApiClient";
-// import { ApiResponse } from "@/types/api/helper/api-response";
+import InstituteModel from "@/models/InstituteSchema";
+import { apiClient } from "./ApiClient";
+import { errorToast, successToast } from "@/components/Custom/Utils/Toast";
 import {
   InstituteCheckEmailResponse,
   InstituteCodeResponse,
 } from "@/types/api/institute/institute-api";
-import { apiClient } from "./ApiClient";
-
+// import { ApiResponse }
 class Institute {
   private IGNORE_WORDS: string[];
+
   constructor() {
     this.IGNORE_WORDS = ["of", "the", "and", "&"];
   }
 
+  /**
+   * --------------------------------
+   * Generate Short Initials
+   * --------------------------------
+   */
   public generateInitials(name: string): string {
     const filtered = name
       .trim()
@@ -26,6 +31,11 @@ class Institute {
     return initials || "INS";
   }
 
+  /**
+   * --------------------------------
+   * Generate Institute Code
+   * --------------------------------
+   */
   public async generateInstituteCode(
     institute_name: string
   ): Promise<InstituteCodeResponse> {
@@ -34,9 +44,7 @@ class Institute {
         throw new Error("Invalid institute name");
       }
 
-      // NEW initials logic
       const initials = this.generateInitials(institute_name);
-
       const regex = new RegExp(`^${initials}`, "i");
 
       const lastCode = await InstituteModel.findOne({
@@ -54,10 +62,7 @@ class Institute {
           ""
         );
         const parsed = Number(numeric);
-
-        if (!Number.isNaN(parsed)) {
-          nextNumber = parsed + 1;
-        }
+        if (!Number.isNaN(parsed)) nextNumber = parsed + 1;
       }
 
       const institute_code = `${initials}${String(nextNumber).padStart(
@@ -80,6 +85,11 @@ class Institute {
     }
   }
 
+  /**
+   * --------------------------------
+   * Email uniqueness check
+   * --------------------------------
+   */
   public async checkEmailUnique(
     email: string
   ): Promise<ApiResponse<InstituteCheckEmailResponse>> {
@@ -91,6 +101,7 @@ class Institute {
 
       return res;
     } catch (err: any) {
+      errorToast("Error checking email");
       return {
         success: false,
         error: "Error checking email",
@@ -98,6 +109,12 @@ class Institute {
       };
     }
   }
+
+  /**
+   * --------------------------------
+   * Register Institute
+   * --------------------------------
+   */
   public async register(
     values: any
   ): Promise<
@@ -107,7 +124,9 @@ class Institute {
       const res = await apiClient.post<
         ApiResponse<{ institute_id: string; institute_name: string }>
       >("institute", { ...values });
+
       if (!res.success) throw new Error(res.error);
+
       return res;
     } catch (err: any) {
       return {
@@ -120,5 +139,56 @@ class Institute {
       };
     }
   }
+
+  /**
+   * --------------------------------
+   * Verify OTP
+   * --------------------------------
+   */
+  public async codeVerify(
+    code: string,
+    email: string
+  ): Promise<ApiResponse<any>> {
+    try {
+      const payload = {
+        code,
+        identifier: email,
+      };
+
+      console.log("InstituteConf - request payload:", payload);
+
+      const response = await apiClient.post<ApiResponse<any>>(
+        "institute/verify-code",
+        payload
+      );
+
+      console.log("InstituteConf - API response:", response);
+
+      if (!response?.success) {
+        errorToast(response?.error || "Invalid Code");
+      } else {
+        successToast("Email Verified Successfully");
+      }
+
+      return (
+        response || {
+          success: false,
+          error: "Empty response from server",
+          data: null,
+        }
+      );
+    } catch (err: any) {
+      console.log("InstituteConf - caught error:", err);
+
+      errorToast(err?.message || "Error verifying OTP");
+
+      return {
+        success: false,
+        error: err?.message || "Error verifying code",
+        data: null,
+      };
+    }
+  }
 }
+
 export const InstituteConf = new Institute();
