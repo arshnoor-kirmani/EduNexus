@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
-import { LucideLoader, Mail, School } from "lucide-react";
+import { LucideLoader, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   UseFormWatch,
