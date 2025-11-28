@@ -1,6 +1,6 @@
-import Header from "@/components/Custom/Utils/Header";
-import Section from "@/components/Custom/Utils/Section";
-import Footer from "@/components/Custom/Utils/Footer";
+import Header from "@/components/custom/Utils/Header";
+import Section from "@/components/custom/Utils/Section";
+import Footer from "@/components/custom/Utils/Footer";
 export default function Home() {
   return (
     <div className="w-full h-full flex flex-col overflow-x-hidden">

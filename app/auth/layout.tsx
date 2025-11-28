@@ -1,8 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ThemeToggle } from "@/components/Custom/Utils/theme-toggle";
-import { LogoLink } from "@/components/Custom/Utils/Header";
+import { ThemeToggle } from "@/components/custom/Utils/theme-toggle";
+import { LogoLink } from "@/components/custom/Utils/Header";
 import { AppData } from "@/helper/appConfig";
 import { MetadataBuilder } from "@/lib/MetadataBuilder";
 
@@ -24,7 +24,10 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
       {/* Header Icons */}
       <div className="absolute top-4 right-4 z-50">
-        <ThemeToggle className="border bg-background/80 backdrop-blur-md hover:bg-accent transition" />
+        <ThemeToggle
+          variant="ghost"
+          className="border bg-background/80 backdrop-blur-md hover:bg-accent transition"
+        />
       </div>
 
       <div className="absolute top-4 left-4 z-50">
@@ -32,12 +35,12 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main content */}
-      <main className="relative z-20 flex items-center justify-center min-h-screen px-4">
+      <main className="relative z-20 flex items-center justify-center min-h-screen">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="absolute bottom-4 left-0 right-0 z-20 text-center text-sm text-muted-foreground">
+      <footer className="absolute bottom-4 left-0 right-0 z-20 text-left px-4 text-sm text-muted-foreground">
         © {new Date().getFullYear()}{" "}
         <b>
           <Link href="/" className="hover:underline">

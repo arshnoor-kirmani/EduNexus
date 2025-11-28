@@ -1,4 +1,4 @@
-import InstituteModel from "@/app/models/InstituteSchema";
+import InstituteModel from "@/models/InstituteSchema";
 import dbConnect from "@/lib/DatabaseConnection";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ---------------- DATABASE CONNECT ----------------
-    await dbConnect("institutes");
+    await dbConnect();
 
     // ---------------- QUERY ----------------
     const institute = await InstituteModel.findOne({ email })

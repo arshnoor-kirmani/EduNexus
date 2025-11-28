@@ -1,5 +1,6 @@
 // import { ApiResponse } from "@/types/api/helper/api-response";
 import axios, { AxiosRequestConfig } from "axios";
+import bcrypt from "bcryptjs";
 
 // Query params type
 type QueryParams = Record<string, string | number | boolean | null | undefined>;
@@ -49,9 +50,9 @@ class ApiClient {
 
     const queryString = this.buildQuery(params);
 
-    // --- FIXED URL NORMALIZATION ---
     let url = endPoint;
 
+    // ---- URL NORMALIZATION ----
     if (endPoint.startsWith("http")) {
       url = endPoint + queryString;
     } else {
@@ -73,9 +74,36 @@ class ApiClient {
 
     console.log("FINAL URL →", config.url);
 
-    const response = await axios<T>(config);
-    console.log({ response: response.data }); //remove
-    return response.data;
+    try {
+      console.log("ApiClient Props", options); //remove
+      const response = await axios<T>(config);
+      console.log("ApiClient res", { response: response.data });
+      return response.data;
+    } catch (err: any) {
+      // axios error structure
+      const axiosError = err;
+
+      let message = "Something went wrong";
+
+      if (axiosError.response) {
+        // Server responded with 4xx or 5xx
+        const data = axiosError.response.data;
+        message =
+          data?.message ||
+          data?.error ||
+          axiosError.response.statusText ||
+          "Unexpected server error";
+      } else if (axiosError.request) {
+        // No response from server
+        message = "No response from server. Please check your connection.";
+      } else if (axiosError.message) {
+        // Axios internal error
+        message = axiosError.message;
+      }
+
+      console.error("API ERROR:", message);
+      throw new Error(message);
+    }
   }
 
   // ----------------------------
@@ -175,6 +203,10 @@ class ApiClient {
       params,
       headers,
     });
+  }
+  public verifyOtpHash(code: string, hash: string): Promise<boolean> {
+    console.log({ code, hash });
+    return bcrypt.compare(code, hash);
   }
 }
 

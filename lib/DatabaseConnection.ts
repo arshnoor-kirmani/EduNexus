@@ -5,56 +5,71 @@ export type ConnectionObject = {
   dbName?: string;
 };
 
-// Reuse the same connection in dev/hot reload
 const globalWithMongoose = globalThis as typeof globalThis & {
   mongooseConnection?: ConnectionObject;
 };
 
 export default async function dbConnect(
-  databaseName: string
+  databaseName?: string
 ): Promise<ConnectionObject> {
-  // Check for existing cached connection
+  const cached = globalWithMongoose.mongooseConnection;
+
   if (
-    globalWithMongoose.mongooseConnection?.isConnected === 1 &&
-    globalWithMongoose.mongooseConnection?.dbName === databaseName
+    cached?.isConnected === 1 &&
+    (cached.dbName === databaseName ||
+      cached.dbName === process.env.DATABASE_NAME)
   ) {
-    console.log(`✅ Using existing database connection: ${databaseName}`);
-    return globalWithMongoose.mongooseConnection;
+    console.log(`✅ Reusing cached connection: ${mongoose.connection.name}`);
+    return cached;
   }
 
-  // Close previous connection if database name changed
+  const currentDb = mongoose.connection.name;
   if (
     mongoose.connection.readyState === 1 &&
-    mongoose.connections[0]?.name !== databaseName
+    (currentDb !== databaseName || currentDb === process.env.DATABASE_NAME)
   ) {
-    console.log(
-      `⚠️ Closing previous connection to ${mongoose.connections[0]?.name}...`
-    );
+    console.log(`⚠️ Closing connection to old DB: ${currentDb}`);
     await mongoose.connection.close();
   }
 
-  try {
-    // Build connection string
-    const url =
-      databaseName === "institutes"
-        ? `${process.env.MONGODB_URL}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority`
-        : `${process.env.MONGODB_URL}/${databaseName}?retryWrites=true&w=majority`;
+  const baseUrl = process.env.MONGODB_URL;
+  if (!baseUrl) throw new Error("❌ MONGODB_URL missing in .env!");
 
-    // Establish new connection
-    const db = await mongoose.connect(url, { maxPoolSize: 10 });
-    console.log(`Connected to MongoDB: ${db.connection.name}`);
+  // Detect if base URL already has a DB name
+  const hasDbName = new URL(baseUrl).pathname.replace(/^\//, "").length > 0;
+
+  let connectionUri = baseUrl.replace(/\/+$/, "");
+
+  if (!hasDbName) {
+    if (!databaseName) {
+      connectionUri = `${connectionUri}/${process.env.DATABASE_NAME}`;
+    } else {
+      connectionUri = `${connectionUri}/${databaseName}`;
+    }
+  }
+
+  if (!connectionUri.includes("?")) {
+    connectionUri += `?retryWrites=true&w=majority`;
+  }
+
+  try {
+    const db = await mongoose.connect(connectionUri, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 5000,
+      maxPoolSize: 10,
+    });
+
+    console.log(`🔗 Connected to MongoDB: ${db.connection.name}`);
 
     const connection: ConnectionObject = {
-      isConnected: db.connections[0].readyState,
-      dbName: db.connections[0].name,
+      isConnected: db.connection.readyState,
+      dbName: db.connection.name,
     };
 
-    // Cache connection globally (prevents hot reload duplication)
     globalWithMongoose.mongooseConnection = connection;
-
     return connection;
   } catch (err) {
-    console.error("MongoDB connection error:", err);
+    console.error("❌ MongoDB connection error:", err);
     throw new Error("Database connection failed");
   }
 }
