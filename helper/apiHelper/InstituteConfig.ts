@@ -1,6 +1,10 @@
 import InstituteModel from "@/models/InstituteSchema";
 import { apiClient } from "./ApiClient";
-import { errorToast, successToast } from "@/components/Custom/Utils/Toast";
+import {
+  errorToast,
+  successToast,
+  warningToast,
+} from "@/components/custom/Utils/Toast";
 import {
   InstituteCheckEmailResponse,
   InstituteCodeResponse,
@@ -167,7 +171,11 @@ class Institute {
       if (!response?.success) {
         errorToast(response?.error || "Invalid Code");
       } else {
-        successToast("Email Verified Successfully");
+        if (response.data?.isVerified) {
+          warningToast(response.message || "Email Verified Successfully");
+        } else {
+          successToast("Email Verified Successfully");
+        }
       }
 
       return (
@@ -185,6 +193,46 @@ class Institute {
       return {
         success: false,
         error: err?.message || "Error verifying code",
+        data: null,
+      };
+    }
+  }
+  public async ResendVerifyCode(email: string): Promise<ApiResponse<any>> {
+    const payload = {
+      identifier: email,
+    };
+
+    try {
+      console.log("InstituteConf - resend payload:", payload);
+
+      const response = await apiClient.post<ApiResponse<any>>(
+        "institute/send-code",
+        payload
+      );
+
+      console.log("InstituteConf - resend response:", response);
+
+      if (!response?.success) {
+        errorToast(response?.error || "Unable to resend code");
+      } else {
+        successToast("Verification code sent again");
+      }
+
+      return (
+        response || {
+          success: false,
+          error: "Empty response from server",
+          data: null,
+        }
+      );
+    } catch (err: any) {
+      console.log("InstituteConf - resend caught error:", err);
+
+      errorToast(err?.message || "Error resending code");
+
+      return {
+        success: false,
+        error: err?.message || "Error resending code",
         data: null,
       };
     }

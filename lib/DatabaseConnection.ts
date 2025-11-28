@@ -19,7 +19,7 @@ export default async function dbConnect(
     (cached.dbName === databaseName ||
       cached.dbName === process.env.DATABASE_NAME)
   ) {
-    console.log(`✅ Reusing cached connection: ${databaseName}`);
+    console.log(`✅ Reusing cached connection: ${mongoose.connection.name}`);
     return cached;
   }
 

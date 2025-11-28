@@ -5,11 +5,13 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { successToast, errorToast } from "@/components/Custom/Utils/Toast";
+import { successToast, errorToast } from "@/components/custom/Utils/Toast";
 import {
   InputOTP,
   InputOTPGroup,
@@ -28,12 +30,14 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EmailSender } from "@/config/EmailSendConfig";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { CustomFormMessage } from "./FormMessage";
+import { Loader2 } from "lucide-react";
 
 interface OTPDialogProps {
   open: boolean;
-  onClose: () => void;
   email: string;
-
+  onSuccess?: () => void;
   verificationType:
     | "register"
     | "login"
@@ -45,45 +49,48 @@ interface OTPDialogProps {
   digits?: number;
 }
 
-const digits = 6;
+const digits = Number(process.env.NEXT_PUBLIC_OTP_DIGITS) || 6;
 const schema = z.object({
   otp: z.string().length(digits, "Enter all digits"),
 });
 
 export default function OTPDialog({
   open,
-  onClose,
   email,
   verificationType,
   verifierType,
   digits = 6,
+  onSuccess,
 }: OTPDialogProps) {
   const [otp, setOtp] = useState("123456");
   const [loading, setLoading] = useState(false);
   const [resendCounter, setResendCounter] = useState(30);
+  const [resendLoading, setResendLoading] = useState(false);
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: { otp: "" },
   });
-  useEffect(() => {
-    if (!open) return;
+  const otpValue = form.watch("otp");
+  function startResendCounter() {
+    let interval: NodeJS.Timeout;
 
-    setOtp("");
-    setResendCounter(30);
-
-    const timer = setInterval(() => {
+    interval = setInterval(() => {
       setResendCounter((sec) => {
         if (sec <= 1) {
-          clearInterval(timer);
+          clearInterval(interval);
           return 0;
         }
         return sec - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
+  }
+  useEffect(() => {
+    if (!open) return;
+    setResendCounter(30);
+    startResendCounter();
   }, [open]);
-
   // -----------------------
   // UNIVERSAL VERIFY FUNCTION
   // -----------------------
@@ -104,6 +111,7 @@ export default function OTPDialog({
       if (!res.success) {
         throw new Error(res.error || "Failed to verify OTP");
       }
+      // onSuccess && onSuccess();
       // onClose();
     } catch (err: any) {
       form.setError("otp", {
@@ -121,40 +129,34 @@ export default function OTPDialog({
   // UNIVERSAL RESEND FUNCTION
   // -----------------------
   const handleResend = async () => {
+    setResendLoading(true);
     try {
-      const res = await fetch(`/api/otp/resend`, {
-        method: "POST",
-        body: JSON.stringify({
-          type: verificationType,
-          role: verifierType,
-          email,
-        }),
-      });
+      const res = await InstituteConf.ResendVerifyCode(email);
 
-      const data = await res.json();
-
-      if (!data.success)
-        return errorToast(data.message || "Failed to resend OTP");
-
-      successToast("OTP sent again");
-      setOtp("");
+      if (!res.success) {
+        setResendLoading(false);
+      }
+      form.setValue("otp", "");
       setResendCounter(30);
+      startResendCounter();
     } catch (err) {
       errorToast("Server error while resending OTP");
+    } finally {
+      setResendLoading(false);
     }
   };
 
   return (
     <Dialog open={open}>
-      <DialogContent className="w-[90%] sm:w-full max-w-sm rounded-2xl p-4 sm:p-6">
-        <DialogHeader className="space-y-2">
+      <DialogContent className="w-[90%] sm:w-full max-w-sm rounded-2xl p-4 sm:p-6 [&>button]:hidden">
+        <DialogHeader className="">
           <DialogTitle className="text-lg font-semibold">
             Email Verification
           </DialogTitle>
-
-          <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
-            <strong>{email}</strong>. on code has been sent to Please enter the
-            code below to continue.
+          <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
+            A verification code has been sent to
+            <span className="font-semibold text-foreground"> {email}</span>.
+            Please enter the code below to continue.
           </DialogDescription>
         </DialogHeader>
 
@@ -201,8 +203,7 @@ export default function OTPDialog({
                         </InputOTP>
                       </div>
                     </FormControl>
-
-                    <FormMessage className="text-center" />
+                    <CustomFormMessage className="text-center w-fit mx-auto" />
                   </FormItem>
                 );
               }}
@@ -212,30 +213,36 @@ export default function OTPDialog({
 
             {/* Verify Button */}
             <Button
-              disabled={loading || form.getValues("otp").length !== digits}
+              disabled={loading || otpValue?.length !== digits}
               className="block mx-auto mt-5 sm:mt-6 h-10 text-sm rounded-lg"
             >
               {loading ? "Verifying…" : "Verify Code"}
             </Button>
-
-            {/* Resend */}
-            <div className="flex justify-between items-center mt-4">
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Didn’t get the code?
-              </p>
-
-              <Button
-                variant="link"
-                onClick={handleResend}
-                disabled={resendCounter > 0}
-                className="p-0 text-xs sm:text-sm"
-              >
-                {resendCounter > 0
-                  ? `Resend in ${resendCounter}s`
-                  : "Send Code Again"}
-              </Button>
-            </div>
           </form>
+          {/* Resend */}
+          <div className="flex justify-between items-center mt-4">
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Didn’t get the code?
+            </p>
+
+            <Button
+              variant="link"
+              onClick={handleResend}
+              disabled={resendCounter > 0 || resendLoading}
+              className="p-0 text-xs sm:text-sm cursor-pointer"
+            >
+              {resendLoading ? (
+                <span className="flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Resending...
+                </span>
+              ) : resendCounter > 0 ? (
+                `Resend in ${resendCounter}s`
+              ) : (
+                "Send Code Again"
+              )}
+            </Button>
+          </div>
         </Form>
       </DialogContent>
     </Dialog>

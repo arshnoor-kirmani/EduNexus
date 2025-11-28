@@ -31,9 +31,9 @@ export async function POST(request: NextRequest) {
     const existingInstitute = await InstituteModel.findOne({ email });
 
     const code = EmailSender.generateOtp();
-    const verifyCode = await hashOtp(code);
+    const verifyCode = await EmailSender.generateHash(code);
     const verifyCodeExpiry = EmailSender.generateExpiry();
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await EmailSender.generateHash(password);
     const codeResult = await InstituteConf.generateInstituteCode(
       institute_name
     );

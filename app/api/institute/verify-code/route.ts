@@ -100,15 +100,15 @@ export async function POST(req: Request) {
     institute.isVerified = true;
 
     // Optional: Clear OTP fields
-    // institute.verifyCode = null;
-    // institute.verifyCodeExpiry = null;
+    institute.verifyCode = null;
+    institute.verifyCodeExpiry = null;
 
     await institute.save();
 
     return NextResponse.json({
       success: true,
       message: "Institute verified successfully",
-      data: { isVerified: true },
+      data: { isVerified: false },
     });
   } catch (e: any) {
     console.error("OTP verification error:", e);

@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { EmailInput } from "@/components/Custom/Form/EmailCheckInput";
-import { PasswordInput } from "@/components/Custom/Form/PasswordInput";
+import { EmailInput } from "@/components/custom/Form/EmailCheckInput";
+import { PasswordInput } from "@/components/custom/Form/PasswordInput";
 import Link from "next/link";
 import {
   Building2Icon,
@@ -31,24 +31,27 @@ import {
   University,
   User2Icon,
 } from "lucide-react";
-import IconInput from "@/components/Custom/Form/IconInput";
+import IconInput from "@/components/custom/Form/IconInput";
 import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
 import { toast } from "sonner";
 import {
   errorToast,
   successToast,
   warningToast,
-} from "@/components/Custom/Utils/Toast";
-import OTPDialog from "@/components/Custom/Form/OtpInput";
+} from "@/components/custom/Utils/Toast";
+import OTPDialog from "@/components/custom/Form/OtpInput";
+import { redirect, useRouter } from "next/navigation";
+import { CustomFormMessage } from "@/components/custom/Form/FormMessage";
 
 export type InstituteFormValues = z.infer<typeof instituteSchema>;
 export default function page() {
   // ======================================
+  const router = useRouter();
   const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
   const [isEmailAvailable, setIsEmailAvailable] = useState<boolean>(false);
   const [instituteName, setInstituteName] = useState<string>();
   const [email, setEmail] = useState<string>(
-    "try.arshnoorkirmani+22@gmail.com"
+    "try.arshnoorkirmani+21@gmail.com"
   );
   const [otpOpen, setOtpOpen] = useState<boolean>(false);
   // ======================================
@@ -110,8 +113,8 @@ export default function page() {
                           className="pl-12"
                           icon={<User2Icon />}
                         />
-                      </FormControl>
-                      <FormMessage className="pl-2" />
+                      </FormControl>{" "}
+                      <CustomFormMessage />
                     </FormItem>
                   )}
                 />
@@ -135,15 +138,15 @@ export default function page() {
                           className="pl-12 w-full"
                         />
                       </FormControl>
-                      <FormMessage className="pl-2" />
-
+                      <CustomFormMessage />
                       {/* Warning */}
                       {instituteName && (
-                        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-lg mt-1">
-                          Your email is already linked with{" "}
-                          <strong>{instituteName}</strong>, but the account is
-                          not verified. Please verify to continue.
-                        </p>
+                        <CustomFormMessage
+                          info="Institute Name detected:"
+                          tooltip="This email is linked with another institute. Proceeding will update the owner name, institute name, and password."
+                        >
+                          <b>{instituteName}</b>
+                        </CustomFormMessage>
                       )}
                     </FormItem>
                   )}
@@ -163,8 +166,8 @@ export default function page() {
                           error={form.formState.errors.institute_name}
                           icon={<Building2Icon />}
                         />
-                      </FormControl>
-                      <FormMessage className="pl-2" />
+                      </FormControl>{" "}
+                      <CustomFormMessage />
                     </FormItem>
                   )}
                 />
@@ -183,8 +186,8 @@ export default function page() {
                           onChange={field.onChange}
                           className="pl-12"
                         />
-                      </FormControl>
-                      <FormMessage className="pl-2" />
+                      </FormControl>{" "}
+                      <CustomFormMessage />
                     </FormItem>
                   )}
                 />
@@ -223,10 +226,12 @@ export default function page() {
       {/* ========================= */}
       <OTPDialog
         open={otpOpen}
-        onClose={() => setOtpOpen(false)}
         email={email}
         verificationType="forgot"
         verifierType="institute"
+        onSuccess={() => {
+          router.push("/auth/institute-login");
+        }}
       />
     </div>
   );
