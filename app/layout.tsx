@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/custom/Utils/theme-provider";
+import { ThemeProvider } from "@/components/custom/utils/theme-provider";
 import { Toaster } from "sonner";
 import { Inter } from "next/font/google";
 // import StoreProvider from "@/components/Custom/Utils/StoreProvider";
-import RouteLoader from "@/components/custom/Utils/RouteLoading";
+import RouteLoader from "@/components/custom/utils/RouteLoading";
 import { MetadataBuilder } from "@/lib/MetadataBuilder";
 
 const inter = Inter({

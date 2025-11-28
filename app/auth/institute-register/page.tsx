@@ -19,10 +19,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { EmailInput } from "@/components/custom/Form/EmailCheckInput";
-import { PasswordInput } from "@/components/custom/Form/PasswordInput";
+import { PasswordInput } from "@/components/custom/form/PasswordInput";
 import Link from "next/link";
 import {
   Building2Icon,
@@ -31,17 +29,18 @@ import {
   University,
   User2Icon,
 } from "lucide-react";
-import IconInput from "@/components/custom/Form/IconInput";
+import IconInput from "@/components/custom/form/IconInput";
 import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
 import { toast } from "sonner";
 import {
   errorToast,
   successToast,
   warningToast,
-} from "@/components/custom/Utils/Toast";
-import OTPDialog from "@/components/custom/Form/OtpInput";
-import { redirect, useRouter } from "next/navigation";
-import { CustomFormMessage } from "@/components/custom/Form/FormMessage";
+} from "@/components/custom/utils/Toast";
+import OTPDialog from "@/components/custom/form/OtpInput";
+import { useRouter } from "next/navigation";
+import { CustomFormMessage } from "@/components/custom/form/FormMessage";
+import { EmailInput } from "@/components/custom/form/emailCheckInput";
 
 export type InstituteFormValues = z.infer<typeof instituteSchema>;
 export default function page() {
