@@ -1,8 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ThemeToggle } from "@/components/custom/Utils/theme-toggle";
-import { LogoLink } from "@/components/custom/Utils/Header";
+import { ThemeToggle } from "@/components/custom/utils/theme-toggle";
+import { LogoLink } from "@/components/custom/utils/Header";
 import { AppData } from "@/helper/appConfig";
 import { MetadataBuilder } from "@/lib/MetadataBuilder";
 

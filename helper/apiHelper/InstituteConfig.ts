@@ -4,7 +4,7 @@ import {
   errorToast,
   successToast,
   warningToast,
-} from "@/components/custom/Utils/Toast";
+} from "@/components/custom/utils/Toast";
 import {
   InstituteCheckEmailResponse,
   InstituteCodeResponse,

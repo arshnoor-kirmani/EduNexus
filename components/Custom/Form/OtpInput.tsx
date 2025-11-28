@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { successToast, errorToast } from "@/components/custom/Utils/Toast";
+import { successToast, errorToast } from "@/components/custom/utils/Toast";
 import {
   InputOTP,
   InputOTPGroup,
