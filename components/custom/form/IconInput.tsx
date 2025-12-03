@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
-import { FieldError } from "react-hook-form";
+import { FieldError } from "react-hook-form"
 
 interface IconInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon: React.ReactNode;
