@@ -15,12 +15,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from "@/components/custom/utils/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AppData } from "@/helper/appConfig";
+import { AppData } from "@/config/appConfig";
 
 // Navigation links
-const details = AppData.HeadersDetails;
+const details = AppData.header.landing;
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -45,7 +45,7 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 flex h-16 items-center justify-between">
         {/* === Left: Logo === */}
-        <LogoLink name={AppData.APP_NAME} iconUrl={AppData.APP_ICON} />
+        <LogoLink name={AppData.app.name} iconUrl={AppData.app.icon} />
 
         {/* === Right: Navigation === */}
         <div className="flex items-center gap-3 md:gap-5">

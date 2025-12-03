@@ -4,8 +4,11 @@ import { ThemeProvider } from "@/components/custom/utils/theme-provider";
 import { Toaster } from "sonner";
 import { Inter } from "next/font/google";
 // import StoreProvider from "@/components/Custom/Utils/StoreProvider";
-import RouteLoader from "@/components/custom/utils/RouteLoading";
 import { MetadataBuilder } from "@/lib/MetadataBuilder";
+import { LoaderProvider } from "@/components/custom/utils/loader/glober-loader-provider";
+import Loader from "@/components/custom/utils/loader/Loader";
+import RouteLoadTrigger from "@/components/custom/utils/loader/RouteLoadTrigger";
+import InternetStatus from "@/components/custom/utils/InternetStatus";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -47,15 +50,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* Global Route Transition Loader */}
-          <RouteLoader />
-
-          {/* Page content */}
-          {/* <StoreProvider> */}
-          {children}
-          {/* </StoreProvider> */}
-
-          {/* Toast notifications */}
+          {/* 🔥 auto-route loader */}
+          <LoaderProvider>
+            <RouteLoadTrigger />
+            <InternetStatus />
+            {children}
+            <Loader />
+          </LoaderProvider>
           <Toaster richColors />
         </ThemeProvider>
       </body>

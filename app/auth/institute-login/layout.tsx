@@ -2,8 +2,8 @@ import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ThemeToggle } from "@/components/custom/utils/theme-toggle";
-import { LogoLink } from "@/components/custom/utils/Header";
-import { AppData } from "@/helper/appConfig";
+import { LogoLink } from "@/components/custom/utils/header/Header";
+import { AppData } from "@/config/appConfig";
 import { MetadataBuilder } from "@/lib/MetadataBuilder";
 
 export const metadata = MetadataBuilder.auth("Institute Login");
@@ -31,7 +31,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="absolute top-4 left-4 z-50">
-        <LogoLink name={AppData.APP_NAME} iconUrl={AppData.APP_ICON} />
+        <LogoLink name={AppData.app.name} iconUrl={AppData.app.icon} />
       </div>
 
       {/* Main content */}
@@ -44,7 +44,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
         © {new Date().getFullYear()}{" "}
         <b>
           <Link href="/" className="hover:underline">
-            {AppData.APP_NAME}
+            {AppData.app.name}
           </Link>
         </b>{" "}
         — All rights reserved.

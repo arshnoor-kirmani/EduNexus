@@ -1,11 +1,10 @@
-// import { ApiResponse } from "@/types/api/helper/api-response";
 import axios, { AxiosRequestConfig } from "axios";
 import bcrypt from "bcryptjs";
 
 // Query params type
 type QueryParams = Record<string, string | number | boolean | null | undefined>;
 
-// Options
+// Options type
 type FetchOptions = {
   method: "GET" | "POST" | "PUT" | "DELETE";
   body?: any;
@@ -14,9 +13,12 @@ type FetchOptions = {
 };
 
 class ApiClient {
-  // Build ?a=1&b=2
+  // --------------------------
+  // Build query strings
+  // --------------------------
   private buildQuery(params?: QueryParams): string {
     if (!params) return "";
+
     const query = Object.entries(params)
       .filter(([_, value]) => value !== null && value !== undefined)
       .map(
@@ -27,20 +29,24 @@ class ApiClient {
 
     return query ? `?${query}` : "";
   }
-  public normalizeEndpoint(endPoint: string): string {
-    if (endPoint.startsWith("http")) return endPoint; // full URL
 
-    let clean = endPoint.replace(/^\/+/, ""); // remove leading slashes
+  // --------------------------
+  // Normalize endpoint
+  // --------------------------
+  public normalizeEndpoint(endpoint: string): string {
+    if (endpoint.startsWith("http")) return endpoint;
 
-    if (!clean.startsWith("api/")) {
-      clean = "api/" + clean;
-    }
+    let clean = endpoint.replace(/^\/+/, "");
+
+    if (!clean.startsWith("api/")) clean = "api/" + clean;
 
     return `${process.env.NEXT_PUBLIC_APP_URL}/${clean}`;
   }
 
-  // Core request method
-  private async fetch<T>(endPoint: string, options?: FetchOptions): Promise<T> {
+  // --------------------------
+  // Core Request Handler
+  // --------------------------
+  private async fetch<T>(endpoint: string, options?: FetchOptions): Promise<T> {
     const { method = "GET", body, headers = {}, params } = options || {};
 
     const finalHeaders = {
@@ -48,21 +54,21 @@ class ApiClient {
       ...headers,
     };
 
-    const queryString = this.buildQuery(params);
+    const queryStr = this.buildQuery(params);
 
-    let url = endPoint;
-
-    // ---- URL NORMALIZATION ----
-    if (endPoint.startsWith("http")) {
-      url = endPoint + queryString;
+    // If endpoint is already an absolute URL (http/https), use it as-is
+    let url: string;
+    if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
+      url = endpoint + queryStr;
     } else {
-      let clean = endPoint.replace(/^\/+/, "");
-
-      if (!clean.startsWith("api/")) {
-        clean = "api/" + clean;
+      // Handle relative endpoints
+      const cleanEndpoint = endpoint.replace(/^\/+/, "");
+      
+      if (!cleanEndpoint.startsWith("api/")) {
+        url = "/api/" + cleanEndpoint + queryStr;
+      } else {
+        url = "/" + cleanEndpoint + queryStr;
       }
-
-      url = "/" + clean + queryString;
     }
 
     const config: AxiosRequestConfig = {
@@ -72,21 +78,14 @@ class ApiClient {
       data: body,
     };
 
-    console.log("FINAL URL →", config.url);
-
     try {
-      console.log("ApiClient Props", options); //remove
       const response = await axios<T>(config);
-      console.log("ApiClient res", { response: response.data });
       return response.data;
     } catch (err: any) {
-      // axios error structure
       const axiosError = err;
-
       let message = "Something went wrong";
 
       if (axiosError.response) {
-        // Server responded with 4xx or 5xx
         const data = axiosError.response.data;
         message =
           data?.message ||
@@ -94,21 +93,18 @@ class ApiClient {
           axiosError.response.statusText ||
           "Unexpected server error";
       } else if (axiosError.request) {
-        // No response from server
-        message = "No response from server. Please check your connection.";
+        message = "Server not responding. Please check your connection.";
       } else if (axiosError.message) {
-        // Axios internal error
         message = axiosError.message;
       }
 
-      console.error("API ERROR:", message);
       throw new Error(message);
     }
   }
 
-  // ----------------------------
-  // GET Overloads
-  // ----------------------------
+  // --------------------------
+  // GET
+  // --------------------------
   public get<T>(endpoint: string): Promise<T>;
   public get<T>(endpoint: string, params: QueryParams): Promise<T>;
   public get<T>(
@@ -128,9 +124,9 @@ class ApiClient {
     });
   }
 
-  // ----------------------------
-  // POST Overloads
-  // ----------------------------
+  // --------------------------
+  // POST
+  // --------------------------
   public post<T>(endpoint: string): Promise<T>;
   public post<T>(endpoint: string, body: any): Promise<T>;
   public post<T>(endpoint: string, body: any, params: QueryParams): Promise<T>;
@@ -140,7 +136,6 @@ class ApiClient {
     params: QueryParams,
     headers: Record<string, string>
   ): Promise<T>;
-
   public post<T>(
     endpoint: string,
     body?: any,
@@ -155,9 +150,9 @@ class ApiClient {
     });
   }
 
-  // ----------------------------
-  // PUT Overloads
-  // ----------------------------
+  // --------------------------
+  // PUT
+  // --------------------------
   public put<T>(endpoint: string): Promise<T>;
   public put<T>(endpoint: string, body: any): Promise<T>;
   public put<T>(endpoint: string, body: any, params: QueryParams): Promise<T>;
@@ -167,7 +162,6 @@ class ApiClient {
     params: QueryParams,
     headers: Record<string, string>
   ): Promise<T>;
-
   public put<T>(
     endpoint: string,
     body?: any,
@@ -182,9 +176,9 @@ class ApiClient {
     });
   }
 
-  // ----------------------------
-  // DELETE Overloads
-  // ----------------------------
+  // --------------------------
+  // DELETE
+  // --------------------------
   public delete<T>(endpoint: string): Promise<T>;
   public delete<T>(endpoint: string, params: QueryParams): Promise<T>;
   public delete<T>(
@@ -192,7 +186,6 @@ class ApiClient {
     params: QueryParams,
     headers: Record<string, string>
   ): Promise<T>;
-
   public delete<T>(
     endpoint: string,
     params?: QueryParams,
@@ -204,8 +197,11 @@ class ApiClient {
       headers,
     });
   }
+
+  // --------------------------
+  // OTP hash compare
+  // --------------------------
   public verifyOtpHash(code: string, hash: string): Promise<boolean> {
-    console.log({ code, hash });
     return bcrypt.compare(code, hash);
   }
 }

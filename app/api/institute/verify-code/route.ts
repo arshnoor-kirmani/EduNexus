@@ -2,7 +2,7 @@ import dbConnect from "@/lib/DatabaseConnection";
 import { verifyOtpSchema } from "@/lib/validators/Api/Verify";
 import { NextResponse } from "next/server";
 import InstituteModel from "@/models/InstituteSchema";
-import { apiClient } from "@/helper/apiHelper/ApiClient";
+import { apiClient } from "@/helper/ApiClient";
 import mongoose from "mongoose";
 
 export async function POST(req: Request) {

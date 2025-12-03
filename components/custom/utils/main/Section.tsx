@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { AppData } from "@/helper/appConfig";
+import { AppData } from "@/config/appConfig";
 import {
   BarChart3,
   School,
@@ -32,7 +32,7 @@ export default function Section() {
             </h1>
 
             <p className="mt-5 text-muted-foreground text-base md:text-lg max-w-2xl leading-relaxed">
-              Set up your institute in minutes. <b>{details.APP_NAME}</b>{" "}
+              Set up your institute in minutes. <b>{details.app.name}</b>{" "}
               empowers administrators, teachers, and students through an
               integrated platform — simplifying admissions, attendance,
               communication, and reporting with secure and intelligent tools
@@ -41,7 +41,7 @@ export default function Section() {
 
             {/* CTA BUTTONS */}
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
-              <Link href="/auth/institute-signup">
+              <Link href={AppData.routes.frontend.auth.register.institute}>
                 <Button
                   size="lg"
                   className="shadow-md w-full hover:shadow-xl transition-all"
@@ -49,7 +49,7 @@ export default function Section() {
                   Create Institute Account
                 </Button>
               </Link>
-              <Link href="/auth/institute-login">
+              <Link href={AppData.routes.frontend.auth.login.institute}>
                 <Button
                   size="lg"
                   variant="secondary"
@@ -111,7 +111,7 @@ export default function Section() {
             </ol>
 
             <div className="mt-6">
-              <Link href="/auth/institute-signup">
+              <Link href={AppData.routes.frontend.auth.register.institute}>
                 <Button className="w-full shadow-sm hover:shadow-md transition-all cursor-pointer">
                   Start Setup
                 </Button>
@@ -174,7 +174,7 @@ export default function Section() {
             title="Institute Login"
             desc="Access full administrative controls and settings."
             color="chart-1"
-            href="/auth/institute-login"
+            href={AppData.routes.frontend.auth.login.institute}
           />
 
           <InfoCard
@@ -182,7 +182,7 @@ export default function Section() {
             title="Institute User Login"
             desc="Manage internal institute modules and limited features."
             color="chart-5"
-            href="/auth/institute-user-login"
+            href={AppData.routes.frontend.auth.login.user}
           />
 
           <InfoCard
@@ -190,7 +190,7 @@ export default function Section() {
             title="Teacher Login"
             desc="Manage classes, assignments, students, and academic reports."
             color="chart-2"
-            href="/auth/teacher-login"
+            href={AppData.routes.frontend.auth.login.teacher}
           />
 
           <InfoCard
@@ -198,7 +198,7 @@ export default function Section() {
             title="Student Login"
             desc="View attendance, grades, schedules, and institute updates."
             color="chart-4"
-            href="/auth/student-login"
+            href={AppData.routes.frontend.auth.login.student}
           />
         </CardContent>
       </Card>

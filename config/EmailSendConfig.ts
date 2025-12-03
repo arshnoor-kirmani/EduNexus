@@ -1,4 +1,4 @@
-import { apiClient } from "@/helper/apiHelper/ApiClient";
+import { apiClient } from "@/helper/ApiClient";
 import { EmailSenderConfigResponse } from "@/types/api/helper/utils";
 import bcrypt from "bcryptjs";
 
