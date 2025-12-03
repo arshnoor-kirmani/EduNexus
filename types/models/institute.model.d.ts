@@ -72,4 +72,6 @@ export interface Institute extends Document {
   rules: Rules;
   createdAt: Date;
   updatedAt: Date;
+  lastLogin: Date | null;
+  status: "active" | "inactive" | "blocked" | "pending";
 }

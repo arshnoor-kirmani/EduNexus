@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AppData } from "@/helper/appConfig";
+import { AppData } from "@/config/appConfig";
 
 export class MetadataBuilder {
   /**
@@ -7,23 +7,23 @@ export class MetadataBuilder {
    */
   private static base(): Metadata {
     return {
-      metadataBase: new URL(AppData.APP_URL),
+      metadataBase: new URL(AppData.app.url),
 
-      applicationName: AppData.APP_NAME,
+      applicationName: AppData.app.name,
 
       icons: {
-        icon: AppData.APP_ICON,
-        shortcut: AppData.APP_ICON,
-        apple: AppData.APP_ICON,
+        icon: AppData.app.icon,
+        shortcut: AppData.app.icon,
+        apple: AppData.app.icon,
       },
 
-      creator: AppData.APP_NAME,
-      publisher: AppData.APP_NAME,
+      creator: AppData.app.name,
+      publisher: AppData.app.name,
 
       keywords: [
-        AppData.APP_NAME,
+        AppData.app.name,
         "Institute Management System",
-        "EduNecus",
+        "EduNexus",
         "Admin Panel",
         "Student Portal",
         "Next.js",
@@ -37,41 +37,42 @@ export class MetadataBuilder {
 
       openGraph: {
         type: "website",
-        siteName: AppData.APP_NAME,
+        siteName: AppData.app.name,
+        title: AppData.app.og.title,
+        description: AppData.app.og.description,
         images: [
           {
-            url: AppData.OG_IMAGE,
+            url: AppData.app.og.image,
             width: 1200,
             height: 630,
-            alt: `${AppData.APP_NAME} Preview`,
+            alt: `${AppData.app.name} Preview`,
           },
         ],
       },
 
       twitter: {
         card: "summary_large_image",
-        images: [AppData.OG_IMAGE],
-        creator: AppData.APP_NAME,
+        title: AppData.app.og.title,
+        description: AppData.app.og.description,
+        images: [AppData.app.og.image],
+        creator: AppData.app.name,
       },
     };
   }
 
   /**
-   * Authentication pages (login/register/reset)
-   * - Robots blocked for security
-   * - Strong metadata
+   * Authentication pages
    */
-  static auth(title: string = "Authentication"): Metadata {
+  static auth(title = "Authentication"): Metadata {
     return {
       ...this.base(),
 
       title: {
-        // default: `${title} — ${AppData.APP_NAME}`,
-        default: `${title} `,
-        template: `%s — ${AppData.APP_NAME}`,
+        default: `${title}`,
+        template: `%s — ${AppData.app.name}`,
       },
 
-      description: `Secure authentication gateway for ${AppData.APP_NAME}. Login or create your account.`,
+      description: `Secure authentication for ${AppData.app.name}. Login or create your account.`,
 
       robots: {
         index: false,
@@ -87,19 +88,18 @@ export class MetadataBuilder {
   }
 
   /**
-   * Dashboard / App Internal Areas
-   * - Allows indexing of main pages (optional)
+   * Dashboard / internal pages
    */
-  static dashboard(title: string = "Dashboard", allowIndex = false): Metadata {
+  static dashboard(title = "Dashboard", allowIndex = false): Metadata {
     return {
       ...this.base(),
 
       title: {
-        default: `${title} — ${AppData.APP_NAME}`,
-        template: `%s — ${AppData.APP_NAME}`,
+        default: `${title} — ${AppData.app.name}`,
+        template: `%s — ${AppData.app.name}`,
       },
 
-      description: `${AppData.APP_NAME} dashboard for managing courses, students, staff, and institute operations.`,
+      description: `${AppData.app.name} dashboard for managing courses, students, staff, and institute operations.`,
 
       robots: {
         index: allowIndex,
@@ -109,7 +109,7 @@ export class MetadataBuilder {
   }
 
   /**
-   * Public facing pages — full SEO enabled
+   * Public-facing pages (SEO optimized)
    */
   static page({
     title,
@@ -126,8 +126,8 @@ export class MetadataBuilder {
       ...this.base(),
 
       title: {
-        default: `${title} — ${AppData.APP_NAME}`,
-        template: `%s — ${AppData.APP_NAME}`,
+        default: `${title} — ${AppData.app.name}`,
+        template: `%s — ${AppData.app.name}`,
       },
 
       description,

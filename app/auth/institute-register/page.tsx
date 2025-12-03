@@ -22,15 +22,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/custom/form/PasswordInput";
 import Link from "next/link";
-import {
-  Building2Icon,
-  LucideLoader,
-  School,
-  University,
-  User2Icon,
-} from "lucide-react";
+import { Building2Icon, LucideLoader, User2Icon } from "lucide-react";
 import IconInput from "@/components/custom/form/IconInput";
-import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
+import { InstituteConf } from "@/config/InstituteClient";
 import { toast } from "sonner";
 import {
   errorToast,
@@ -41,11 +35,14 @@ import OTPDialog from "@/components/custom/form/OtpInput";
 import { useRouter } from "next/navigation";
 import { CustomFormMessage } from "@/components/custom/form/FormMessage";
 import { EmailInput } from "@/components/custom/form/emailCheckInput";
+import { AppData } from "@/config/appConfig";
+import { useGlobalLoader } from "@/components/custom/utils/loader/glober-loader-provider";
 
 export type InstituteFormValues = z.infer<typeof instituteSchema>;
 export default function page() {
   // ======================================
   const router = useRouter();
+  const { showLoader, hideLoader } = useGlobalLoader();
   const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
   const [isEmailAvailable, setIsEmailAvailable] = useState<boolean>(false);
   const [instituteName, setInstituteName] = useState<string>();
@@ -58,38 +55,36 @@ export default function page() {
     resolver: zodResolver(instituteSchema),
     defaultValues: { name: "", email: "", institute_name: "", password: "" },
   });
-  // ================== On Submit================
   async function onSubmit(values: InstituteFormValues) {
-    console.log({ values });
     setIsSubmiting(true);
+
     try {
-      const res = InstituteConf.register(values).then((res) => {
-        if (res.success) {
-          successToast("Institute Registered Successfully");
-          setEmail(values.email);
-          setOtpOpen(true);
-        } else {
-          warningToast(res.error || "Error registering institute");
-        }
-        setIsSubmiting(false);
-      });
-      console.log({ res });
+      // register() already shows toast + returns boolean
+      const ok = await InstituteConf.register(values);
+
+      if (ok) {
+        // Only do UI actions here
+        setEmail(values.email);
+        setOtpOpen(true);
+      }
     } catch (err: any) {
-      console.log({ err });
-      errorToast(err.message || "Error registering institute");
+      errorToast(err?.message || "Error registering institute");
+    } finally {
       setIsSubmiting(false);
-      toast.error(err);
     }
   }
+
   return (
     <div className="container flex items-center justify-center min-h-screen p-4">
       <div className="w-[420px]">
         <Card>
-          <CardHeader className="text-center">
-            <CardTitle>Create Institute Account</CardTitle>
-            <CardDescription className="text-xs">
-              Create an account for your institute
-            </CardDescription>
+          <CardHeader className="text-center space-y-0.5">
+            <CardTitle className="text-xl font-semibold">
+              Create Institute Account
+              <CardDescription className="font-normal tracking-normal">
+                Get started by setting up your institute profile
+              </CardDescription>
+            </CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -122,19 +117,20 @@ export default function page() {
                 <FormField
                   control={form.control}
                   name="email"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <EmailInput<InstituteFormValues>
+                        <EmailInput
                           {...field}
+                          mode="register"
                           watch={form.watch}
                           trigger={form.trigger}
                           setError={form.setError}
                           clearErrors={form.clearErrors}
-                          setInstituteName={setInstituteName}
+                          setAvailableName={setInstituteName}
                           setEmailAvailable={setIsEmailAvailable}
-                          className="pl-12 w-full"
+                          error={!!fieldState.error}
                         />
                       </FormControl>
                       <CustomFormMessage />
@@ -161,9 +157,9 @@ export default function page() {
                       <FormControl>
                         <IconInput
                           {...field}
-                          placeholder="Enter Institute Name"
-                          error={form.formState.errors.institute_name}
-                          icon={<Building2Icon />}
+                          placeholder="Enter Owner Name"
+                          className="pl-12"
+                          icon={<User2Icon />}
                         />
                       </FormControl>{" "}
                       <CustomFormMessage />
@@ -175,15 +171,15 @@ export default function page() {
                 <FormField
                   control={form.control}
                   name="password"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
                         <PasswordInput
                           {...field}
-                          value={field.value}
-                          onChange={field.onChange}
-                          className="pl-12"
+                          error={!!fieldState.error}
+                          placeholder="••••••••••"
+                          showRequirements
                         />
                       </FormControl>{" "}
                       <CustomFormMessage />
@@ -201,10 +197,10 @@ export default function page() {
                   {isSubmiting ? (
                     <span className="inline-flex items-center gap-2">
                       <LucideLoader className="animate-spin" size={16} />
-                      Submitting...
+                      Registering...
                     </span>
                   ) : (
-                    "Submit"
+                    "Register Institute"
                   )}
                 </Button>
 
@@ -229,7 +225,7 @@ export default function page() {
         verificationType="forgot"
         verifierType="institute"
         onSuccess={() => {
-          router.push("/auth/institute-login");
+          router.push(AppData.routes.frontend.auth.login.institute);
         }}
       />
     </div>

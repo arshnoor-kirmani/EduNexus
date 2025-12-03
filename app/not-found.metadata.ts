@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import { AppData } from "@/helper/appConfig";
+import { AppData } from "@/config/appConfig";
 
 export const metadata: Metadata = {
-  title: AppData.NOT_FOUND_TITLE,
-  description: AppData.NOT_FOUND_DESCRIPTION,
+  title: AppData.meta.notFound.title,
+  description: AppData.meta.notFound.description,
 
   robots: { index: false },
 
   openGraph: {
-    title: AppData.NOT_FOUND_TITLE,
-    description: AppData.NOT_FOUND_DESCRIPTION,
+    title: AppData.meta.notFound.title,
+    description: AppData.meta.notFound.description,
     images: [
       {
-        url: `${AppData.APP_URL}${AppData.NOT_FOUND_OG_IMAGE}`,
+        url: `${AppData.app.url}${AppData.meta.notFound.image}`,
         width: 1200,
         height: 630,
-        alt: AppData.NOT_FOUND_TITLE,
+        alt: AppData.meta.notFound.title,
       },
     ],
-    url: AppData.APP_URL,
-    siteName: AppData.APP_NAME,
+    url: AppData.app.url,
+    siteName: AppData.app.name,
     type: "website",
   },
 };

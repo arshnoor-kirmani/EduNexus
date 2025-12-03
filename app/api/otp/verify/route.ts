@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 // Import all role models
 import InstituteModel from "@/models/InstituteSchema";
-import { apiClient } from "@/helper/apiHelper/ApiClient";
+import { apiClient } from "@/helper/ApiClient";
 // import StudentModel from "@/models/StudentSchema";
 // import TeacherModel from "@/models/TeacherSchema";
 // import UserModel from "@/models/UserSchema";

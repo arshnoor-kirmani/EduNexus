@@ -18,7 +18,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
+import { InstituteConf } from "@/config/InstituteClient";
 import {
   Form,
   FormControl,
@@ -111,7 +111,7 @@ export default function OTPDialog({
       if (!res.success) {
         throw new Error(res.error || "Failed to verify OTP");
       }
-      // onSuccess && onSuccess();
+      onSuccess?.();
       // onClose();
     } catch (err: any) {
       form.setError("otp", {

@@ -102,3 +102,28 @@ export const warningToast = (msg: string, opts?: ToastOptions) =>
 
 export const loadingToast = (msg: string, opts?: ToastOptions) =>
   showToast("loading", msg, opts);
+// ----------------------------------------------
+interface PromiseToastOptions {
+  loading: string;
+  success: string | ((data: any) => string);
+  error: string | ((err: any) => string);
+}
+interface PromiseToastOptions {
+  loading: string;
+  success: string | ((data: any) => string);
+  error: string | ((err: any) => string);
+}
+
+export function promiseToast<T>(
+  promise: Promise<T>,
+  { loading, success, error }: PromiseToastOptions
+) {
+  return toast.promise(promise, {
+    loading,
+
+    success: (data) =>
+      typeof success === "function" ? success(data) : success,
+
+    error: (err) => (typeof error === "function" ? error(err) : error),
+  });
+}

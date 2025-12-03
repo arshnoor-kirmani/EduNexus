@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { EmailSender } from "@/config/EmailSendConfig";
-import { InstituteConf } from "@/helper/apiHelper/InstituteConfig";
+import { InstituteConf } from "@/config/InstituteClient";
 
 const UpdateInstituteSchema = z.object({
   institute_code: z.string().min(1, "Institute code is required"),

@@ -1,7 +1,8 @@
 import InstituteModel from "@/models/InstituteSchema";
-import { apiClient } from "./ApiClient";
+import { apiClient } from "../helper/ApiClient";
 import {
   errorToast,
+  promiseToast,
   successToast,
   warningToast,
 } from "@/components/custom/utils/Toast";
@@ -9,6 +10,7 @@ import {
   InstituteCheckEmailResponse,
   InstituteCodeResponse,
 } from "@/types/api/institute/institute-api";
+import { signIn } from "next-auth/react";
 // import { ApiResponse }
 class Institute {
   private IGNORE_WORDS: string[];
@@ -119,28 +121,75 @@ class Institute {
    * Register Institute
    * --------------------------------
    */
-  public async register(
-    values: any
-  ): Promise<
-    ApiResponse<{ institute_id: string | null; institute_name: string | null }>
-  > {
+  public async register(values: any): Promise<boolean> {
     try {
-      const res = await apiClient.post<
+      const result = await apiClient.post<
         ApiResponse<{ institute_id: string; institute_name: string }>
-      >("institute", { ...values });
+      >("institute", values);
 
-      if (!res.success) throw new Error(res.error);
+      if (!result.success) {
+        errorToast(result.error || "Registration failed");
+        return false;
+      }
+      successToast("Registration Successful!", {
+        description:
+          // <span className="text-emerald-700 animate-pulse">
+          `${result.data.institute_name}" has been created successfully. A
+            verification code has been sent to your email.`,
+        // </span>
+      });
 
-      return res;
+      return true;
     } catch (err: any) {
-      return {
-        success: false,
-        error: "Error registering institute",
-        data: {
-          institute_id: null,
-          institute_name: null,
-        },
-      };
+      const apiError =
+        err?.message || "Something went wrong during registration.";
+      errorToast(apiError);
+      return false;
+    }
+  }
+  /**
+   * --------------------------------
+   * Login Institute
+   * --------------------------------
+   */
+  public async login(values: {
+    email: string;
+    password: string;
+  }): Promise<boolean> {
+    try {
+      if (!values?.email || !values?.password) {
+        warningToast("Please provide both email and password");
+        return false;
+      }
+
+      const response = await signIn("institute-login", {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+      });
+      console.log("Login response:", response);
+
+      // ❌ Invalid credentials → NextAuth sets response.error
+      if (response?.error) {
+        try {
+          const parsed = JSON.parse(response.error);
+          errorToast(parsed.message || "Invalid login");
+        } catch {
+          errorToast(response.error || "Login failed");
+        }
+        return false;
+      }
+
+      // ✅ SUCCESS
+      successToast("Logged in successfully!", {
+        description: "Redirected to institute dashboard ...",
+      });
+
+      return true;
+    } catch (err) {
+      errorToast("Something went wrong. Please try again.");
+      console.error("Login error:", err);
+      return false;
     }
   }
 
@@ -153,43 +202,32 @@ class Institute {
     code: string,
     email: string
   ): Promise<ApiResponse<any>> {
+    const payload = { code, identifier: email };
+    console.log("InstituteConf - request payload:", payload);
+
+    // 1️⃣ Create the request promise (typed correctly)
+    const request = apiClient.post<ApiResponse<any>>(
+      "institute/verify-code",
+      payload
+    );
+
+    // 2️⃣ Trigger promise toast (do NOT return it)
+    promiseToast(request, {
+      loading: "Verifying your code...",
+      success: (res) => {
+        if (!res.success) return "Invalid verification code";
+        if (res?.isVerified)
+          return res.message || "Email verified successfully";
+        return "Verification successful!";
+      },
+      error: (err) => err?.message || "Error verifying code",
+    });
+
+    // 3️⃣ Await the actual API result and return it
     try {
-      const payload = {
-        code,
-        identifier: email,
-      };
-
-      console.log("InstituteConf - request payload:", payload);
-
-      const response = await apiClient.post<ApiResponse<any>>(
-        "institute/verify-code",
-        payload
-      );
-
-      console.log("InstituteConf - API response:", response);
-
-      if (!response?.success) {
-        errorToast(response?.error || "Invalid Code");
-      } else {
-        if (response.data?.isVerified) {
-          warningToast(response.message || "Email Verified Successfully");
-        } else {
-          successToast("Email Verified Successfully");
-        }
-      }
-
-      return (
-        response || {
-          success: false,
-          error: "Empty response from server",
-          data: null,
-        }
-      );
+      const response = await request;
+      return response;
     } catch (err: any) {
-      console.log("InstituteConf - caught error:", err);
-
-      errorToast(err?.message || "Error verifying OTP");
-
       return {
         success: false,
         error: err?.message || "Error verifying code",
@@ -197,6 +235,12 @@ class Institute {
       };
     }
   }
+
+  /**
+   * --------------------------------
+   * Resend OTP
+   * --------------------------------
+   */
   public async ResendVerifyCode(email: string): Promise<ApiResponse<any>> {
     const payload = {
       identifier: email,
