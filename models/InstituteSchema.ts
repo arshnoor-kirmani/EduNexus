@@ -4,25 +4,25 @@ import { Schema, model, models, Model } from "mongoose";
 const InstituteSchema = new Schema<Institute>(
   {
     information: {
-      address: String,
-      city: String,
-      state: String,
-      pincode: String,
-      country: String,
-      mobile: String,
-      email: String,
-      website: String,
-      short_name: String,
+      address: { type: String, default: null },
+      city: { type: String, default: null },
+      state: { type: String, default: null },
+      pincode: { type: String, default: null },
+      country: { type: String, default: null },
+      mobile: { type: String, default: null },
+      email: { type: String, default: null },
+      website: { type: String, default: null },
+      short_name: { type: String, default: null },
       institute_name: { type: String, required: true },
-      institute_code: { type: String },
+      institute_code: { type: String, default: null },
       currency: { type: String, default: "INR" },
       timezone: { type: String, default: "Asia/Kolkata" },
       working_hours: { type: String, default: "9AM - 5PM" },
-      institute_type: String,
-      affiliation: String,
+      institute_type: { type: String, default: null },
+      affiliation: { type: String, default: null },
       established_year: { type: Number, default: new Date().getFullYear() },
-      logo: String,
-      profile_url: String,
+      logo: { type: String, default: null },
+      profile_url: { type: String, default: null },
     },
 
     username: { type: String, required: true, trim: true },
@@ -59,7 +59,7 @@ const InstituteSchema = new Schema<Institute>(
       show_teacher: { type: Boolean, default: true },
     },
 
-    lastLogin: Date,
+    lastLogin: { type: Date, default: null },
 
     status: {
       type: String,

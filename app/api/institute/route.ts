@@ -109,8 +109,8 @@ export async function POST(request: NextRequest) {
       username,
       email,
       password: hashedPassword,
-      institute_name,
       information: {
+        institute_name,
         email,
         institute_code: finalInstituteCode,
       },
