@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { AppData } from "@/helper/appConfig";
+import { AppData } from "@/config/appConfig";
 
 export default function Footer() {
   return (
@@ -13,7 +13,7 @@ export default function Footer() {
             href="/"
             className="font-semibold text-foreground hover:text-primary transition-colors"
           >
-            {AppData.APP_NAME}
+            {AppData.app.name}
           </Link>
           <span>· All rights reserved.</span>
         </div>

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { AppData } from "@/helper/appConfig";
+import { AppData } from "@/config/appConfig";
 import {
   BarChart3,
   School,
@@ -32,7 +32,7 @@ export default function Section() {
             </h1>
 
             <p className="mt-5 text-muted-foreground text-base md:text-lg max-w-2xl leading-relaxed">
-              Set up your institute in minutes. <b>{details.APP_NAME}</b>{" "}
+              Set up your institute in minutes. <b>{details.app.name}</b>{" "}
               empowers administrators, teachers, and students through an
               integrated platform — simplifying admissions, attendance,
               communication, and reporting with secure and intelligent tools
