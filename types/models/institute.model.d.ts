@@ -47,7 +47,7 @@ export interface Institute extends Document {
     email: string | null;
     website: string | null;
     short_name: string | null;
-    institute_name: string | null;
+    institute_name: string;
     institute_code: string | null;
     currency: string | null;
     timezone: string | null;
@@ -59,9 +59,9 @@ export interface Institute extends Document {
     logo: string | null;
     profile_url: string | null;
   };
-  username: string | null;
-  email: string | null;
-  password: string | null;
+  username: string;
+  email: string;
+  password: string;
   user_type: "institute";
   isVerified: boolean;
   verifyCode: string | null;
